@@ -7,7 +7,12 @@ namespace GamesApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class GamesController : ControllerBase
-{
+{    [HttpGet("favourites")]
+    public ActionResult<List<Game>> GetFavourites()
+    {
+        var favourites = GamesStore.Games.Where(g => g.IsFavourite).ToList();
+        return Ok(favourites);
+    }
     [HttpGet]
     public ActionResult<List<Game>> GetAll() {
         return Ok(GamesStore.Games);
@@ -22,6 +27,10 @@ public class GamesController : ControllerBase
     }
     [HttpPost]
     public ActionResult<Game> Create([FromBody] Game game) {
+    if (string.IsNullOrEmpty(game.Title))
+    {
+        return BadRequest(new { message = "Название игры не может быть пустым" });
+    }
         game.Id = GamesStore.NextId();
         GamesStore.Games.Add(game);
         return CreatedAtAction(nameof(GetById), new {id = game.Id}, game);
@@ -46,4 +55,6 @@ public class GamesController : ControllerBase
         game.ReleaseYear = updated.ReleaseYear;
         return Ok(game);
     }
+
+
 }
